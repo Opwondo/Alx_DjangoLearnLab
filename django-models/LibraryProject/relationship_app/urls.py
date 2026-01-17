@@ -1,13 +1,8 @@
-from atexit import register
-from django import views
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from . import views
-from .views import CustomLoginView, CustomLogoutView, list_books, LibraryDetailView
 
 urlpatterns = [
-    path('books/', list_books, name='list_books'),  
-    path('library/<int:pk>/', LibraryDetailView.as_view(), name='library_detail'), 
     path('login/', LoginView.as_view(
         template_name='relationship_app/login.html'
     ), name='login'),
