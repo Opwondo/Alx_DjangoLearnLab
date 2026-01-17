@@ -20,4 +20,9 @@ urlpatterns = [
         views.register,
         name='register'
     ),
+    path('admin-dashboard/', views.admin_view, name='admin_dashboard'),
+    path('librarian-dashboard/', views.librarian_view, name='librarian_dashboard'),
+    path('member-dashboard/', views.member_view, name='member_dashboard'),
+    path('dashboard/', views.redirect_dashboard, name='dashboard'),
+
 ]
