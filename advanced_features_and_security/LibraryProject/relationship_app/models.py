@@ -1,3 +1,4 @@
+# relationship_app/models.py
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -54,7 +55,7 @@ class Librarian(models.Model):
 
 
 # -------------------------
-# USER PROFILE & ROLES
+# USER PROFILE & ROLES - FIX related_name
 # -------------------------
 
 class UserProfile(models.Model):
@@ -66,7 +67,8 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='relationship_profile'  # CHANGED to unique name
     )
     role = models.CharField(
         max_length=20,
@@ -79,7 +81,7 @@ class UserProfile(models.Model):
 
 
 # -------------------------
-# SIGNALS
+# SIGNALS - Update to use new related_name
 # -------------------------
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -90,5 +92,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'userprofile'):
-        instance.userprofile.save()
+    try:
+        instance.relationship_profile.save()
+    except UserProfile.DoesNotExist:
+        pass  # Profile doesn't exist yet, that's OK
