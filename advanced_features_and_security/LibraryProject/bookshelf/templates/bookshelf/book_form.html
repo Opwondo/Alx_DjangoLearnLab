@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ action|default:"Create" }} Book</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form div { margin-bottom: 10px; }
+        label { display: inline-block; width: 150px; }
+        input { padding: 5px; width: 300px; }
+        button { padding: 8px 15px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>{{ action|default:"Create" }} Book</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="{{ book.title|default:'' }}" required>
+        </div>
+        <div>
+            <label for="author">Author:</label>
+            <input type="text" id="author" name="author" value="{{ book.author|default:'' }}" required>
+        </div>
+        <div>
+            <label for="publication_year">Publication Year:</label>
+            <input type="number" id="publication_year" name="publication_year" 
+                   value="{{ book.publication_year|default:'' }}" required min="1000" max="2100">
+        </div>
+        <button type="submit">💾 {{ action|default:"Create" }} Book</button>
+    </form>
+    
+    <p><a href="{% url 'book_list' %}">← Back to list</a></p>
+</body>
+</html>

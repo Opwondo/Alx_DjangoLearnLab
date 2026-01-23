@@ -24,7 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('relationship/', include('relationship_app.urls')),
     path('', include('relationship_app.urls')),
-    path('', lambda request: redirect('dashboard')),  # redirect root URL to dashboard
+    path('', lambda request: redirect('dashboard')), 
+    path('bookshelf/', include('bookshelf.urls')),
 
 ]
 if settings.DEBUG:

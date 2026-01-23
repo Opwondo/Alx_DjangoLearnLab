@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ book.title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .book-info { background-color: #f8f9fa; padding: 15px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>{{ book.title }}</h1>
+    
+    <div class="book-info">
+        <p><strong>📖 Title:</strong> {{ book.title }}</p>
+        <p><strong>✍️ Author:</strong> {{ book.author }}</p>
+        <p><strong>📅 Publication Year:</strong> {{ book.publication_year }}</p>
+        <p><strong>✅ Available:</strong> {{ book.is_available|yesno:"Yes,No" }}</p>
+    </div>
+    
+    <p><a href="{% url 'book_list' %}">← Back to list</a></p>
+</body>
+</html>

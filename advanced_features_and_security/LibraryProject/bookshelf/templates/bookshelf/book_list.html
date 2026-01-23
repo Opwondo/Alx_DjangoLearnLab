@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book List</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .message { padding: 10px; margin: 10px 0; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px; margin: 5px 0; background-color: #f8f9fa; }
+        .actions a { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>📚 Book List</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <p>Welcome, {{ user.username }}!</p>
+    
+    {% if perms.bookshelf.can_create %}
+    <p><a href="{% url 'book_create' %}">➕ Add New Book</a></p>
+    {% endif %}
+    
+    <ul>
+    {% for book in books %}
+        <li>
+            <strong>{{ book.title }}</strong> by {{ book.author }} ({{ book.publication_year }})
+            <div class="actions">
+                {% if perms.bookshelf.can_view %}
+                <a href="{% url 'book_detail' book.pk %}">👁️ View</a>
+                {% endif %}
+                
+                {% if perms.bookshelf.can_edit %}
+                <a href="{% url 'book_edit' book.pk %}">✏️ Edit</a>
+                {% endif %}
+                
+                {% if perms.bookshelf.can_delete %}
+                <a href="{% url 'book_delete' book.pk %}">🗑️ Delete</a>
+                {% endif %}
+            </div>
+        </li>
+    {% empty %}
+        <li>No books available.</li>
+    {% endfor %}
+    </ul>
+    
+    <p><a href="/admin">Go to Admin Panel</a></p>
+</body>
+</html>
