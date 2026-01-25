@@ -112,29 +112,83 @@ AUTH_USER_MODEL = 'bookshelf.CustomUser'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ============================================
-# SECURITY SETTINGS - DEVELOPMENT VERSION
+# HTTPS & SECURITY SETTINGS
 # ============================================
 
-# Disable secure settings for development
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
-SESSION_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SAMESITE = 'Lax'
+# ============================================
+# STEP 1: HTTPS SUPPORT CONFIGURATION
+# ============================================
+# SECURE_SSL_REDIRECT: Set to True to redirect all non-HTTPS requests to HTTPS.
+SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
 
-# Security middleware settings (keep these for security)
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
+# SECURE_HSTS_SECONDS: Set to 31536000 (1 year) to instruct browsers to only
+# access the site via HTTPS for the specified time.
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+
+# SECURE_HSTS_INCLUDE_SUBDOMAINS: Set to True to include all subdomains
+# in the HSTS policy.
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# SECURE_HSTS_PRELOAD: Set to True to allow preloading in HSTS preload lists.
+SECURE_HSTS_PRELOAD = True
+
+# ============================================
+# STEP 2: SECURE COOKIES CONFIGURATION
+# ============================================
+# SESSION_COOKIE_SECURE: Set to True to ensure session cookies are only
+# transmitted over HTTPS connections.
+SESSION_COOKIE_SECURE = True
+
+# CSRF_COOKIE_SECURE: Set to True to ensure CSRF cookies are only
+# transmitted over HTTPS connections.
+CSRF_COOKIE_SECURE = True
+
+# Additional cookie security
+CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access to CSRF cookie
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+CSRF_COOKIE_SAMESITE = 'Lax'  # CSRF cookie SameSite attribute
+SESSION_COOKIE_SAMESITE = 'Lax'  # Session cookie SameSite attribute
+
+# ============================================
+# STEP 3: SECURE HEADERS CONFIGURATION
+# ============================================
+# X_FRAME_OPTIONS: Set to "DENY" to prevent your site from being framed
+# and protect against clickjacking attacks.
 X_FRAME_OPTIONS = 'DENY'
 
-# Disable HTTPS redirect for development
-SECURE_SSL_REDIRECT = False
+# SECURE_CONTENT_TYPE_NOSNIFF: Set to True to prevent browsers from
+# MIME-sniffing a response away from the declared content-type.
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Disable HSTS for development
-SECURE_HSTS_SECONDS = 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
+# SECURE_BROWSER_XSS_FILTER: Set to True to enable the browser's
+# XSS filtering and help prevent cross-site scripting attacks.
+SECURE_BROWSER_XSS_FILTER = True
+
+# Additional security headers
+SECURE_REFERRER_POLICY = 'same-origin'
+
+# ============================================
+# DEVELOPMENT OVERRIDES
+# ============================================
+# For development/testing, override HTTPS settings
+# Remove or comment this section in production
+if DEBUG:
+    # Disable HTTPS redirect for development
+    SECURE_SSL_REDIRECT = False
+    
+    # Disable secure cookies for development
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    
+    # Disable HSTS for development
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    
+    # Development tools
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+    INTERNAL_IPS = ['127.0.0.1']
 
 # Password hashing
 PASSWORD_HASHERS = [

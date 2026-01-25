@@ -18,7 +18,8 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import include, path, include
 from django.conf import settings
-from django.conf.urls.static import static, bookshelf_views
+from django.conf.urls.static import static
+from bookshelf import views as bookshelf_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),

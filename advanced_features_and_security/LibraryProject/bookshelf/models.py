@@ -68,16 +68,6 @@ class UserProfile(models.Model):
         return f"Profile of {self.user.username}"
 
 
-# Book Model
-class Book(models.Model):
-    title = models.CharField(max_length=200)
-    author = models.CharField(max_length=100)
-    publication_year = models.IntegerField()
-    is_available = models.BooleanField(default=True)
-    
-    def __str__(self):
-        return self.title
-
 # Book Model with Custom Permissions
 class Book(models.Model):
     title = models.CharField(max_length=200)
