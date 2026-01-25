@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Project</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background-color: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+        .features { display: flex; flex-wrap: wrap; gap: 20px; }
+        .feature { flex: 1; min-width: 200px; background: white; padding: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Library Project</h1>
+        <p>Welcome to the Django Library Management System</p>
+        
+        <div class="card">
+            <h2>Quick Links:</h2>
+            <p><a href="{% url 'book_list' %}" class="btn">View Books</a></p>
+            <p><a href="/admin/" class="btn">Admin Panel</a></p>
+            <p><a href="{% url 'example_form' %}" class="btn">Example Form</a></p>
+            <p><a href="{% url 'secure_search' %}" class="btn">Secure Search</a></p>
+        </div>
+        
+        <div class="card">
+            <h2>Security Features Implemented:</h2>
+            <div class="features">
+                <div class="feature">
+                    <h3>🔒 Permissions</h3>
+                    <p>Role-based access control with Viewers, Editors, and Admins groups.</p>
+                </div>
+                <div class="feature">
+                    <h3>🛡️ CSRF Protection</h3>
+                    <p>All forms include CSRF tokens to prevent cross-site request forgery.</p>
+                </div>
+                <div class="feature">
+                    <h3>🚫 SQL Injection</h3>
+                    <p>Django ORM prevents SQL injection attacks with parameterized queries.</p>
+                </div>
+                <div class="feature">
+                    <h3>✂️ XSS Prevention</h3>
+                    <p>Input sanitization and automatic HTML escaping in templates.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Test Credentials:</h2>
+            <ul>
+                <li><strong>Viewer:</strong> viewer / viewer123 (can only view books)</li>
+                <li><strong>Editor:</strong> editor / editor123 (can view, create, edit books)</li>
+                <li><strong>Admin:</strong> admin / admin123 (full access to everything)</li>
+            </ul>
+            <p><a href="/bookshelf/">Login required for book management</a></p>
+        </div>
+    </div>
+</body>
+</html>

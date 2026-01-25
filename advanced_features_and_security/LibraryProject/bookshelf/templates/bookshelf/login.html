@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .login-container { max-width: 400px; margin: 50px auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { padding: 8px; width: 100%; box-sizing: border-box; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        .error { color: red; }
+        .test-users { background-color: #f8f9fa; padding: 15px; margin-top: 20px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>🔐 Login</h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="error">
+                    <p>Invalid username or password. Please try again.</p>
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="id_username">Username:</label>
+                {{ form.username }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password">Password:</label>
+                {{ form.password }}
+            </div>
+            
+            <button type="submit">Login</button>
+        </form>
+        
+        <div class="test-users">
+            <h3>Test Users:</h3>
+            <p><strong>Viewer:</strong> viewer / viewer123</p>
+            <p><strong>Editor:</strong> editor / editor123</p>
+            <p><strong>Admin:</strong> admin / admin123</p>
+        </div>
+        
+        <p><a href="{% url 'book_list' %}">Go to Book List</a></p>
+    </div>
+</body>
+</html>

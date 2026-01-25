@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import include, path, include
 from django.conf import settings
-from django.conf.urls.static import static
+from django.conf.urls.static import static, bookshelf_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +26,10 @@ urlpatterns = [
     path('', include('relationship_app.urls')),
     path('', lambda request: redirect('dashboard')), 
     path('bookshelf/', include('bookshelf.urls')),
+    path('', bookshelf_views.home_page, name='home'),
+    path('login/', bookshelf_views.custom_login, name='login'),
+
+
 
 ]
 if settings.DEBUG:

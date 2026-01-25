@@ -4,6 +4,8 @@ from django.contrib import messages
 from pexpect import EOF
 from .models import Book
 from .forms import ExampleForm
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import AuthenticationForm
 
 import bleach
 from django.db.models import Q
@@ -194,3 +196,29 @@ def example_form_view(request):
         form = ExampleForm()
     
     return render(request, 'bookshelf/example_form.html', {'form': form})
+
+
+
+# Login view (simple version)
+def custom_login(request):
+    """Simple login view for testing."""
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back {username}!')
+                return redirect('book_list')
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'bookshelf/login.html', {'form': form})
+
+
+# Public home page (no permissions required)
+def home_page(request):
+    """Public home page that doesn't require login."""
+    return render(request, 'bookshelf/home.html')
