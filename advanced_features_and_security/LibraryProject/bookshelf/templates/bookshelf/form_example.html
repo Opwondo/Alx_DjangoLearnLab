@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Form Example</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, textarea, select { 
+            padding: 8px; 
+            width: 100%; 
+            max-width: 400px; 
+            box-sizing: border-box;
+        }
+        .error { color: red; margin-top: 5px; }
+        .csrf-warning { 
+            background-color: #fff3cd; 
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Secure Form Example</h1>
+    
+    <div class="csrf-warning">
+        <strong>Security Note:</strong> This form includes CSRF protection. 
+        The {% raw %}{% csrf_token %}{% endraw %} tag generates a hidden input field 
+        with a token that prevents Cross-Site Request Forgery attacks.
+    </div>
+    
+    <form method="post" action="">
+        <!-- CSRF TOKEN - REQUIRED FOR SECURITY -->
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" 
+                   value="{{ form.name.value|default:'' }}" 
+                   required 
+                   maxlength="100">
+            {% if form.name.errors %}
+                <div class="error">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" 
+                   value="{{ form.email.value|default:'' }}" 
+                   required>
+            {% if form.email.errors %}
+                <div class="error">{{ form.email.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="4" 
+                      required>{{ form.message.value|default:'' }}</textarea>
+            {% if form.message.errors %}
+                <div class="error">{{ form.message.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" name="category">
+                <option value="">Select a category</option>
+                <option value="general" {% if form.category.value == 'general' %}selected{% endif %}>General</option>
+                <option value="support" {% if form.category.value == 'support' %}selected{% endif %}>Support</option>
+                <option value="feedback" {% if form.category.value == 'feedback' %}selected{% endif %}>Feedback</option>
+            </select>
+        </div>
+        
+        <button type="submit">Submit</button>
+    </form>
+    
+    <hr>
+    
+    <h2>Security Features Implemented:</h2>
+    <ul>
+        <li>✅ CSRF Protection with {% raw %}{% csrf_token %}{% endraw %}</li>
+        <li>✅ Input validation using Django Forms</li>
+        <li>✅ Max length limits on text fields</li>
+        <li>✅ Proper input types (email, text, etc.)</li>
+        <li>✅ Output escaping (automatic in Django templates)</li>
+        <li>✅ SQL Injection prevention (Django ORM)</li>
+    </ul>
+    
+    <p><a href="{% url 'book_list' %}">← Back to Book List</a></p>
+</body>
+</html>

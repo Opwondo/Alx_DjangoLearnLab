@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure Search</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .security-info { 
+            background-color: #e8f5e9; 
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .security-warning { 
+            background-color: #ffebee; 
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .result { 
+            padding: 10px; 
+            margin: 5px 0; 
+            background-color: #f5f5f5;
+        }
+        .no-results { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Secure Book Search</h1>
+    
+    <div class="security-info">
+        <h3>✅ Security Features Implemented:</h3>
+        <ul>
+            <li><strong>SQL Injection Prevention:</strong> Using Django ORM with parameterized queries</li>
+            <li><strong>XSS Prevention:</strong> Input sanitization and automatic template escaping</li>
+            <li><strong>Input Validation:</strong> Form validation with min/max length checks</li>
+            <li><strong>Output Encoding:</strong> Automatic HTML escaping in templates</li>
+            <li><strong>Rate Limiting:</strong> Results limited to 50 to prevent DoS</li>
+        </ul>
+    </div>
+    
+    <form method="get" action="">
+        <div style="margin-bottom: 15px;">
+            <label for="id_query">Search Books:</label>
+            {{ form.query }}
+            {% if form.query.errors %}
+                <div style="color: red;">{{ form.query.errors }}</div>
+            {% endif %}
+            <small>Enter title or author (2-100 characters)</small>
+        </div>
+        <button type="submit">Search</button>
+    </form>
+    
+    {% if query %}
+        <hr>
+        <h2>Search Results for "{{ query }}"</h2>
+        
+        {% if results %}
+            <p>Found {{ results|length }} result(s):</p>
+            {% for book in results %}
+                <div class="result">
+                    <strong>{{ book.title }}</strong> by {{ book.author }} ({{ book.publication_year }})
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-results">No books found matching "{{ query }}"</p>
+        {% endif %}
+    {% endif %}
+    
+    <div class="security-warning">
+        <h3>⚠️ Security Warning - What We Prevent:</h3>
+        <p><strong>SQL Injection Attempt:</strong> If a user searches for:</p>
+        <code>test'; DROP TABLE bookshelf_book; --</code>
+        <p>Our secure system will sanitize this to: <code>test</code></p>
+        <p>The SQL keywords (DROP, TABLE, etc.) are removed, and the query is safely executed.</p>
+    </div>
+    
+    <p><a href="{% url 'book_list' %}">← Back to Book List</a></p>
+</body>
+</html>
