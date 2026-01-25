@@ -170,6 +170,9 @@ SECURE_REFERRER_POLICY = 'same-origin'
 # ============================================
 # DEVELOPMENT OVERRIDES
 # ============================================
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # For development/testing, override HTTPS settings
 # Remove or comment this section in production
 if DEBUG:
