@@ -5,15 +5,13 @@ Tests the Django security settings and HTTPS configuration
 """
 
 import os
-import sys
 import django
-import requests
-from django.test import TestCase
-from django.conf import settings
 
 # Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LibraryProject.settings')
 django.setup()
+
+from django.conf import settings
 
 def test_security_settings():
     """Test that all security settings are properly configured."""
@@ -47,9 +45,9 @@ def test_security_settings():
     print("\n" + "=" * 50)
     
     if all_passed:
-        print("🎉 All security settings are correctly configured!")
+        print("🎉 All security settings are correctly configured for PRODUCTION!")
     else:
-        print("⚠️  Some security settings need adjustment")
+        print(f"⚠️  Some security settings need adjustment (DEBUG={settings.DEBUG})")
     
     return all_passed
 
@@ -58,19 +56,27 @@ def check_development_overrides():
     print("\n🛠️  Checking Development Mode")
     print("=" * 50)
     
-    # These settings should be False in development overrides
-    dev_settings = ['SECURE_SSL_REDIRECT', 'SESSION_COOKIE_SECURE', 'CSRF_COOKIE_SECURE']
-    
-    for setting in dev_settings:
-        value = getattr(settings, setting, None)
-        if settings.DEBUG and value:
-            print(f"⚠️  {setting} is True but DEBUG is True")
-            print("   Development mode should disable secure settings")
-        elif not settings.DEBUG and not value:
-            print(f"⚠️  {setting} is False but DEBUG is False")
-            print("   Production mode should have secure settings enabled")
-        else:
-            print(f"✅ {setting}: {value} (DEBUG={settings.DEBUG})")
+    if settings.DEBUG:
+        print(f"📱 DEBUG mode is {settings.DEBUG}")
+        print("Expected development overrides:")
+        
+        # Check development overrides
+        dev_checks = [
+            ('SECURE_SSL_REDIRECT', False, 'HTTPS redirect disabled'),
+            ('SESSION_COOKIE_SECURE', False, 'Secure cookies disabled'),
+            ('CSRF_COOKIE_SECURE', False, 'Secure CSRF disabled'),
+            ('SECURE_HSTS_SECONDS', 0, 'HSTS disabled'),
+        ]
+        
+        for setting, expected, description in dev_checks:
+            actual = getattr(settings, setting, None)
+            if actual == expected:
+                print(f"✅ {setting}: {actual} - {description}")
+            else:
+                print(f"❌ {setting}: Expected {expected}, got {actual}")
+    else:
+        print(f"🚀 PRODUCTION mode (DEBUG={settings.DEBUG})")
+        print("All security settings should be enabled")
 
 if __name__ == '__main__':
     print("Django HTTPS Security Test")
@@ -80,6 +86,7 @@ if __name__ == '__main__':
     check_development_overrides()
     
     print("\n📋 Summary:")
+    print("- Current DEBUG mode:", settings.DEBUG)
     print("- Run 'python manage.py check --deploy' for Django deployment checks")
-    print("- Test manually with: curl -I http://localhost:8000")
-    print("- Use SSL Labs test for production: https://www.ssllabs.com/ssltest/")
+    print("- For production: Set DEBUG = False in settings.py")
+    print("- Test HTTPS configuration with SSL Labs: https://www.ssllabs.com/ssltest/")

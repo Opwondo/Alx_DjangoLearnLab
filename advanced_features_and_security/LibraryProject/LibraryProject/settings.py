@@ -184,11 +184,6 @@ if DEBUG:
     SECURE_HSTS_SECONDS = 0
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
-    
-    # Development tools
-    INSTALLED_APPS += ['debug_toolbar']
-    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
-    INTERNAL_IPS = ['127.0.0.1']
 
 # Password hashing
 PASSWORD_HASHERS = [
