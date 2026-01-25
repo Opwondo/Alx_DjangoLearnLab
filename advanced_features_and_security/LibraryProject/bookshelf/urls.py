@@ -9,5 +9,5 @@ urlpatterns = [
     path('<int:pk>/delete/', views.book_delete, name='book_delete'),
     path('secure-search/', views.secure_search, name='secure_search'),
     path('secure-contact/', views.secure_contact, name='secure_contact'),
-    path('unsafe-example/', views.unsafe_search_example, name='unsafe_example'),  # For educational purposes only
+    path('unsafe-example/', views.unsafe_search_example, name='unsafe_example'), 
 ]

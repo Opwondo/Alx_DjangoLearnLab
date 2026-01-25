@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from pexpect import EOF
 from .models import Book
+from .forms import ExampleForm
+
 import bleach
 from django.db.models import Q
 from .forms import BookSearchForm, ContactForm
@@ -149,14 +151,14 @@ def unsafe_search_example(request):
     if 'q' in request.GET:
         query = request.GET['q']
         
-        # ⚠️ UNSAFE: String concatenation in raw SQL - VULNERABLE TO SQL INJECTION
+        #  UNSAFE: String concatenation in raw SQL - VULNERABLE TO SQL INJECTION
         # Never do this in production!
         unsafe_sql = f"SELECT * FROM bookshelf_book WHERE title LIKE '%{query}%'"
         
-        # ⚠️ UNSAFE: Executing raw SQL without parameterization
+        #  UNSAFE: Executing raw SQL without parameterization
         from django.db import connection
         with connection.cursor() as cursor:
-            cursor.execute(unsafe_sql)  # ⚠️ SQL INJECTION VULNERABILITY
+            cursor.execute(unsafe_sql)  # SQL INJECTION VULNERABILITY
             results = cursor.fetchall()
         
         return render(request, 'bookshelf/unsafe_example.html', {
@@ -166,3 +168,29 @@ def unsafe_search_example(request):
     
     return render(request, 'bookshelf/unsafe_example.html')
 
+
+# Example form view using ExampleForm
+def example_form_view(request):
+    """
+    View demonstrating secure form handling with ExampleForm.
+    Shows proper validation, sanitization, and CSRF protection.
+    """
+    if request.method == 'POST':
+        form = ExampleForm(request.POST)
+        if form.is_valid():
+            # All data has been validated and sanitized
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            message = form.cleaned_data['message']
+            age = form.cleaned_data['age']
+            
+            # SECURE: Process the data (no SQL injection or XSS risk)
+            messages.success(
+                request,
+                f'Thank you {name}! Your form has been submitted securely. Age: {age}'
+            )
+            return redirect('book_list')
+    else:
+        form = ExampleForm()
+    
+    return render(request, 'bookshelf/example_form.html', {'form': form})
