@@ -25,3 +25,35 @@ Django REST Framework generic views.
 
 - Uses DRF generic views for cleaner code.
 - Validation is handled at serializer level.
+
+## Task 2: Filtering, Searching, and Ordering
+
+The Book list endpoint supports advanced query features using
+Django REST Framework filter backends.
+
+### Filtering
+Users can filter books using query parameters:
+
+- `?title=Clean Code`
+- `?publication_year=2022`
+- `?author=1`
+
+### Searching
+Text search is enabled on:
+- Book title
+- Author name
+
+Example:
+
+### Ordering
+Results can be ordered using:
+- `title`
+- `publication_year`
+
+Examples:
+
+These features are implemented in `BookListView` using:
+- DjangoFilterBackend
+- SearchFilter
+- OrderingFilter
+
