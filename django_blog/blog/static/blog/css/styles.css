@@ -507,3 +507,260 @@ footer {
     margin-bottom: 10px;
     font-size: 16px;
 }
+
+/* Comments Section */
+.comments-section {
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.comments-section h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+/* Add Comment Form */
+.add-comment {
+    background-color: #f8f9fa;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.add-comment h3 {
+    color: #555;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    resize: vertical;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.login-to-comment {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-to-comment a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-to-comment a:hover {
+    text-decoration: underline;
+}
+
+/* Comments List */
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.comment-card {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.3s;
+}
+
+.comment-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.comment-author {
+    color: #007bff;
+    font-size: 16px;
+}
+
+.comment-date {
+    color: #666;
+    font-size: 14px;
+}
+
+.comment-edited {
+    color: #999;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.comment-content {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-small {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 3px;
+}
+
+.no-comments {
+    text-align: center;
+    color: #666;
+    padding: 40px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+/* Comment Form Page */
+.comment-form-container,
+.delete-comment-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.comment-form-card,
+.delete-comment-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+}
+
+.comment-form-card h1,
+.delete-comment-card h1 {
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.original-post-preview {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+.original-post-preview h3 {
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.original-post-preview h4 {
+    margin-bottom: 5px;
+}
+
+.original-post-preview a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.original-post-preview a:hover {
+    text-decoration: underline;
+}
+
+/* Delete Comment Page */
+.comment-preview {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.comment-preview h3 {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.comment-text {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 3px solid #007bff;
+}
+
+.post-context {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+}
+
+.post-context a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.post-context a:hover {
+    text-decoration: underline;
+}
+
+/* Update profile stats */
+.profile-stats p {
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.profile-posts {
+    margin-top: 30px;
+    width: 100%;
+}
+
+.profile-posts h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.profile-post-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-post-item a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.profile-post-item a:hover {
+    text-decoration: underline;
+}
+
+.profile-post-item .post-date {
+    color: #666;
+    font-size: 12px;
+}
+
+.btn-small {
+    padding: 5px 10px;
+    font-size: 14px;
+}

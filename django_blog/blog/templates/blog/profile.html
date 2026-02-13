@@ -54,10 +54,10 @@
             <div class="profile-stats">
                 <h3>Your Blog Stats</h3>
                 <p>Posts written: {{ user_posts }}</p>
-                <p>Comments made: 0</p>
+                <p>Comments made: {{ user_comments }}</p>
                 <p>Member since: {{ request.user.date_joined|date:"F j, Y" }}</p>
             </div>
-
+           
             <div class="profile-posts">
                 <h3>Your Recent Posts</h3>
                 {% for post in request.user.posts.all|slice:":5" %}
@@ -71,6 +71,7 @@
                 {% endfor %}
             </div>
         </div>
+        
         
         <div class="profile-footer">
             <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
