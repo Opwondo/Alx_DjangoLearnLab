@@ -1,24 +1,19 @@
-from tokenize import Comment
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
-from .forms import CommentForm, PostForm, UserRegisterForm, UserUpdateForm
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Post
-from django.views.decorators.http import require_POST
-
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse_lazy, reverse
+from django.views.decorators.http import require_POST
+from .models import Post, Comment
+from .forms import UserRegisterForm, UserUpdateForm, PostForm, CommentForm
 
-
+# Authentication Views
 def home(request):
     return render(request, 'blog/base.html', {'title': 'Home'})
-
-def posts(request):
-    return HttpResponse("Blog Posts Page - Coming Soon")
 
 def register(request):
     if request.method == 'POST':
@@ -56,6 +51,7 @@ def logout_view(request):
     messages.success(request, 'You have been successfully logged out.')
     return redirect('home')
 
+# ========== PROFILE VIEW - BEGIN ==========
 @login_required
 def profile(request):
     if request.method == 'POST':
@@ -67,7 +63,18 @@ def profile(request):
     else:
         form = UserUpdateForm(instance=request.user)
     
-    return render(request, 'blog/profile.html', {'form': form, 'title': 'Profile'})
+    # Get user's posts count
+    user_posts = Post.objects.filter(author=request.user).count()
+    # Get user's comments count
+    user_comments = Comment.objects.filter(author=request.user).count()
+    
+    return render(request, 'blog/profile.html', {
+        'form': form, 
+        'title': 'Profile',
+        'user_posts': user_posts,
+        'user_comments': user_comments
+    })
+# ========== PROFILE VIEW - END ==========
 
 # Blog Post CRUD Views
 class PostListView(ListView):
@@ -76,6 +83,8 @@ class PostListView(ListView):
     context_object_name = 'posts'
     ordering = ['-published_date']
     paginate_by = 5
+
+# ========== POST DETAIL VIEW WITH COMMENTS - BEGIN ==========
 class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
@@ -87,10 +96,7 @@ class PostDetailView(DetailView):
         context['comment_form'] = CommentForm()
         context['comments'] = self.object.comments.all()
         return context
-class PostDetailView(DetailView):
-    model = Post
-    template_name = 'blog/post_detail.html'
-    context_object_name = 'post'
+# ========== POST DETAIL VIEW WITH COMMENTS - END ==========
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -130,6 +136,72 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         messages.success(self.request, 'Your post has been deleted successfully!')
         return super().delete(request, *args, **kwargs)
 
+# ========== COMMENT CRUD OPERATIONS - BEGIN ==========
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post_id = self.kwargs['post_id']
+        messages.success(self.request, 'Your comment has been added successfully!')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('post-detail', kwargs={'pk': self.object.post.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['post'] = get_object_or_404(Post, pk=self.kwargs['post_id'])
+        return context
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        messages.success(self.request, 'Your comment has been updated successfully!')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('post-detail', kwargs={'pk': self.object.post.pk})
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comment'] = self.get_object()
+        context['post'] = self.get_object().post
+        return context
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = 'blog/comment_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('post-detail', kwargs={'pk': self.object.post.pk})
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Your comment has been deleted successfully!')
+        return super().delete(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comment'] = self.get_object()
+        context['post'] = self.get_object().post
+        return context
+# ========== COMMENT CRUD OPERATIONS - END ==========
+
+# ========== FUNCTION-BASED COMMENT VIEWS (RETAINED FOR COMPATIBILITY) - BEGIN ==========
 @login_required
 @require_POST
 def add_comment(request, post_id):
@@ -190,3 +262,4 @@ def delete_comment(request, comment_id):
         'comment': comment,
         'title': 'Delete Comment'
     })
+# ========== FUNCTION-BASED COMMENT VIEWS - END ==========

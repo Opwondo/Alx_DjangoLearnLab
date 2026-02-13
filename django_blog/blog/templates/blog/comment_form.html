@@ -1,12 +1,24 @@
 {% extends "blog/base.html" %}
 {% load static %}
 
-{% block title %}Edit Comment - Django Blog{% endblock %}
+{% block title %}
+    {% if comment %}
+        Edit Comment - Django Blog
+    {% else %}
+        New Comment - Django Blog
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="comment-form-container">
     <div class="comment-form-card">
-        <h1>Edit Comment</h1>
+        <h1>
+            {% if comment %}
+                Edit Comment
+            {% else %}
+                New Comment
+            {% endif %}
+        </h1>
         
         {% if messages %}
             {% for message in messages %}
@@ -16,10 +28,11 @@
             {% endfor %}
         {% endif %}
 
+        <!-- ========== COMMENT FORM - BEGIN ========== -->
         <div class="original-post-preview">
             <h3>Commenting on:</h3>
-            <h4><a href="{% url 'post-detail' comment.post.pk %}">{{ comment.post.title }}</a></h4>
-            <p class="post-meta">By {{ comment.post.author.username }}</p>
+            <h4><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h4>
+            <p class="post-meta">By {{ post.author.username }}</p>
         </div>
 
         <form method="POST" class="comment-form">
@@ -38,10 +51,17 @@
             </div>
             
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Update Comment</button>
-                <a href="{% url 'post-detail' comment.post.pk %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if comment %}
+                        Update Comment
+                    {% else %}
+                        Post Comment
+                    {% endif %}
+                </button>
+                <a href="{% url 'post-detail' post.pk %}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
+        <!-- ========== COMMENT FORM - END ========== -->
     </div>
 </div>
 {% endblock %}

@@ -36,20 +36,26 @@
             </div>
         {% endif %}
 
-                <section class="comments-section">
+        <!-- ========== COMMENT FUNCTIONALITY - BEGIN ========== -->
+        <section class="comments-section">
             <h2>Comments ({{ comments.count }})</h2>
             
             <!-- Add Comment Form -->
             {% if user.is_authenticated %}
                 <div class="add-comment">
                     <h3>Add a Comment</h3>
-                    <form method="POST" action="{% url 'add-comment' post.pk %}" class="comment-form">
+                    <!-- ========== USING CLASS-BASED VIEW URL - BEGIN ========== -->
+                    <form method="POST" action="{% url 'comment-create' post.pk %}" class="comment-form">
+                    <!-- ========== USING CLASS-BASED VIEW URL - END ========== -->
                         {% csrf_token %}
                         <div class="form-group">
                             {{ comment_form.content }}
                         </div>
                         <button type="submit" class="btn btn-primary">Post Comment</button>
                     </form>
+                    <!-- ========== FALLBACK TO FUNCTION-BASED VIEW - BEGIN ========== -->
+                    <small class="form-text">Or use <a href="{% url 'add-comment' post.pk %}">alternative comment form</a></small>
+                    <!-- ========== FALLBACK TO FUNCTION-BASED VIEW - END ========== -->
                 </div>
             {% else %}
                 <div class="login-to-comment">
@@ -74,8 +80,13 @@
                         
                         {% if user.is_authenticated and user == comment.author %}
                             <div class="comment-actions">
-                                <a href="{% url 'edit-comment' comment.pk %}" class="btn btn-small btn-primary">Edit</a>
-                                <a href="{% url 'delete-comment' comment.pk %}" class="btn btn-small btn-danger">Delete</a>
+                                <!-- ========== USING CLASS-BASED VIEW URLS - BEGIN ========== -->
+                                <a href="{% url 'comment-update' comment.pk %}" class="btn btn-small btn-primary">Edit</a>
+                                <a href="{% url 'comment-delete' comment.pk %}" class="btn btn-small btn-danger">Delete</a>
+                                <!-- ========== USING CLASS-BASED VIEW URLS - END ========== -->
+                                <!-- ========== FALLBACK TO FUNCTION-BASED VIEWS - BEGIN ========== -->
+                                <small>| <a href="{% url 'edit-comment' comment.pk %}">alt edit</a> | <a href="{% url 'delete-comment' comment.pk %}">alt delete</a></small>
+                                <!-- ========== FALLBACK TO FUNCTION-BASED VIEWS - END ========== -->
                             </div>
                         {% endif %}
                     </div>
@@ -84,6 +95,7 @@
                 {% endfor %}
             </div>
         </section>
+        <!-- ========== COMMENT FUNCTIONALITY - END ========== -->
 
         <div class="post-navigation">
             <a href="{% url 'post-list' %}" class="btn btn-secondary">Back to All Posts</a>
