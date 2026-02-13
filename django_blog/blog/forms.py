@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 
+from blog.models import Post
+
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={
         'class': 'form-control',
@@ -51,3 +53,19 @@ class UserUpdateForm(forms.ModelForm):
         if User.objects.filter(email=email).exclude(username=username).exists():
             raise ValidationError("This email is already registered.")
         return email
+
+
+class PostForm(forms.ModelForm):
+    title = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter post title'
+    }))
+    content = forms.CharField(widget=forms.Textarea(attrs={
+        'class': 'form-control',
+        'placeholder': 'Write your post content here...',
+        'rows': 10
+    }))
+
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
