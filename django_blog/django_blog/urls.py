@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from blog import views
 
 urlpatterns = [
@@ -8,4 +8,6 @@ urlpatterns = [
     path('posts/', views.posts, name='posts'),
     path('login/', views.login_view, name='login'),
     path('register/', views.register, name='register'),
+    path('', include('blog.urls')),
+    
 ]
