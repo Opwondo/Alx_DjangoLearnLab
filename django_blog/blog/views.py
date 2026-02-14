@@ -8,6 +8,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import require_POST
+from django.db.models import Q
 from .models import Post, Comment
 from .forms import UserRegisterForm, UserUpdateForm, PostForm, CommentForm
 
@@ -95,6 +96,9 @@ class PostDetailView(DetailView):
         # Add comment form and comments to context
         context['comment_form'] = CommentForm()
         context['comments'] = self.object.comments.all()
+        # ========== TAGGING FUNCTIONALITY - BEGIN ==========
+        context['related_posts'] = Post.objects.filter(tags__in=self.object.tags.all()).exclude(pk=self.object.pk).distinct()[:5]
+        # ========== TAGGING FUNCTIONALITY - END ==========
         return context
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -105,8 +109,16 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        response = super().form_valid(form)
+        # ========== TAGGING FUNCTIONALITY - BEGIN ==========
+        # Handle tags from the form
+        tags_input = form.cleaned_data.get('tags', '')
+        if tags_input:
+            tag_list = [tag.strip() for tag in tags_input.split(',') if tag.strip()]
+            self.object.tags.add(*tag_list)
+        # ========== TAGGING FUNCTIONALITY - END ==========
         messages.success(self.request, 'Your post has been created successfully!')
-        return super().form_valid(form)
+        return response
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
@@ -115,12 +127,31 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        response = super().form_valid(form)
+        # ========== TAGGING FUNCTIONALITY - BEGIN ==========
+        # Handle tags from the form
+        tags_input = form.cleaned_data.get('tags', '')
+        self.object.tags.clear()
+        if tags_input:
+            tag_list = [tag.strip() for tag in tags_input.split(',') if tag.strip()]
+            self.object.tags.add(*tag_list)
+        # ========== TAGGING FUNCTIONALITY - END ==========
         messages.success(self.request, 'Your post has been updated successfully!')
-        return super().form_valid(form)
+        return response
 
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+    def get_initial(self):
+        initial = super().get_initial()
+        # ========== TAGGING FUNCTIONALITY - BEGIN ==========
+        # Pre-populate tags field
+        post = self.get_object()
+        if post.tags.exists():
+            initial['tags'] = ', '.join([tag.name for tag in post.tags.all()])
+        # ========== TAGGING FUNCTIONALITY - END ==========
+        return initial
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
@@ -136,6 +167,45 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 # ========== BLOG POST CRUD VIEWS - END ==========
 
+# ========== SEARCH AND TAGGING FUNCTIONALITY - BEGIN ==========
+class SearchResultsView(ListView):
+    model = Post
+    template_name = 'blog/search_results.html'
+    context_object_name = 'posts'
+    paginate_by = 5
+
+    def get_queryset(self):
+        query = self.request.GET.get('q', '')
+        if query:
+            # Search in title, content, and tags
+            return Post.objects.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(tags__name__icontains=query)
+            ).distinct().order_by('-published_date')
+        return Post.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q', '')
+        return context
+
+class TaggedPostsView(ListView):
+    model = Post
+    template_name = 'blog/tagged_posts.html'
+    context_object_name = 'posts'
+    paginate_by = 5
+
+    def get_queryset(self):
+        tag_slug = self.kwargs.get('tag_slug')
+        return Post.objects.filter(tags__name__icontains=tag_slug).distinct().order_by('-published_date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tag'] = self.kwargs.get('tag_slug')
+        return context
+# ========== SEARCH AND TAGGING FUNCTIONALITY - END ==========
+
 # ========== COMMENT CRUD OPERATIONS - BEGIN ==========
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
@@ -144,7 +214,6 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        # Using 'pk' -required URL pattern: /post/<int:pk>/comments/new/
         form.instance.post_id = self.kwargs['pk']  
         messages.success(self.request, 'Your comment has been added successfully!')
         return super().form_valid(form)
@@ -202,7 +271,7 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return context
 # ========== COMMENT CRUD OPERATIONS - END ==========
 
-# ========== FUNCTION-BASED COMMENT VIEWS - BEGIN ==========
+# ========== FUNCTION-BASED COMMENT VIEWS (RETAINED FOR COMPATIBILITY) - BEGIN ==========
 @login_required
 @require_POST
 def add_comment(request, post_id):

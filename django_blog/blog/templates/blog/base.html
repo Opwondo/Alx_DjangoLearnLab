@@ -23,6 +23,12 @@
                 {% endif %}
             </ul>
         </nav>
+         <div class="search-bar">
+            <form action="{% url 'search-results' %}" method="GET" class="search-form">
+                <input type="text" name="q" placeholder="Search posts..." class="search-input" value="{{ query|default:'' }}">
+                <button type="submit" class="btn btn-primary btn-small">Search</button>
+            </form>
+        </div>
     </header>
 
     <div class="content">

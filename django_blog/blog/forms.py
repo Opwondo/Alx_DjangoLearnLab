@@ -65,10 +65,14 @@ class PostForm(forms.ModelForm):
         'placeholder': 'Write your post content here...',
         'rows': 10
     }))
+    tags = forms.CharField(widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Enter tags separated by commas (e.g., python, django, tutorial)'
+    }), required=False, help_text="Separate tags with commas")
 
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'tags']
 class CommentForm(forms.ModelForm):
     content = forms.CharField(widget=forms.Textarea(attrs={
         'class': 'form-control',

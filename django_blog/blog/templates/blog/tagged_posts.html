@@ -1,0 +1,76 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block title %}Posts tagged "{{ tag }}" - Django Blog{% endblock %}
+
+{% block content %}
+<div class="tagged-posts-container">
+    <div class="tagged-header">
+        <h1>Posts tagged with "{{ tag }}"</h1>
+        <a href="{% url 'post-list' %}" class="btn btn-secondary">Back to All Posts</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ========== TAGGED POSTS - BEGIN ========== -->
+    <div class="posts-grid">
+        {% for post in posts %}
+            <article class="post-card">
+                <h2 class="post-title">
+                    <a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a>
+                </h2>
+                <div class="post-meta">
+                    <span class="post-author">By {{ post.author.username }}</span>
+                    <span class="post-date">{{ post.published_date|date:"F j, Y" }}</span>
+                </div>
+                <div class="post-excerpt">
+                    {{ post.content|truncatewords:50 }}
+                </div>
+                <!-- ========== TAGS DISPLAY - BEGIN ========== -->
+                {% if post.tags.all %}
+                    <div class="post-tags">
+                        <strong>Tags:</strong>
+                        {% for tag in post.tags.all %}
+                            <a href="{% url 'tagged-posts' tag.name %}" class="tag-link {% if tag.name == tag %}current-tag{% endif %}">#{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <!-- ========== TAGS DISPLAY - END ========== -->
+                <a href="{% url 'post-detail' post.pk %}" class="btn btn-secondary">Read More</a>
+            </article>
+        {% empty %}
+            <div class="no-posts">
+                <p>No posts found with tag "{{ tag }}".</p>
+                <a href="{% url 'post-list' %}" class="btn btn-primary">Browse All Posts</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" class="btn btn-small">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-small">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-small">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-small">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+    <!-- ========== TAGGED POSTS - END ========== -->
+</div>
+{% endblock %}

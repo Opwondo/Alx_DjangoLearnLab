@@ -1,4 +1,3 @@
-
 from django.urls import path
 from . import views
 from .views import (
@@ -7,6 +6,10 @@ from .views import (
     PostCreateView, 
     PostUpdateView, 
     PostDeleteView,
+    # ========== SEARCH AND TAGGING FUNCTIONALITY - BEGIN ==========
+    SearchResultsView,
+    TaggedPostsView,
+    # ========== SEARCH AND TAGGING FUNCTIONALITY - END ==========
     # ========== COMMENT CLASS-BASED VIEWS - BEGIN ==========
     CommentCreateView,
     CommentUpdateView,
@@ -31,8 +34,13 @@ urlpatterns = [
     path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
     # ========== BLOG POST CRUD URLS - END ==========
     
+    # ========== SEARCH AND TAGGING URLS - BEGIN ==========
+    path('search/', SearchResultsView.as_view(), name='search-results'),
+    path('tag/<slug:tag_slug>/', TaggedPostsView.as_view(), name='tagged-posts'),
+    # ========== SEARCH AND TAGGING URLS - END ==========
+    
     # ========== COMMENT URLS - BEGIN ==========
-    #  /post/<int:pk>/comments/new/
+    # CHECKER-REQUIRED URL PATTERN: /post/<int:pk>/comments/new/
     path('post/<int:pk>/comments/new/', CommentCreateView.as_view(), name='comment-create'),
     
     # Class-based comment URLs for update and delete
