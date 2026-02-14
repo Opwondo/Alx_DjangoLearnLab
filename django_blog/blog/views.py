@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from .models import Post, Comment
 from .forms import UserRegisterForm, UserUpdateForm, PostForm, CommentForm
 
-# Authentication Views
+# ========== AUTHENTICATION VIEWS - BEGIN ==========
 def home(request):
     return render(request, 'blog/base.html', {'title': 'Home'})
 
@@ -50,6 +50,7 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'You have been successfully logged out.')
     return redirect('home')
+# ========== AUTHENTICATION VIEWS - END ==========
 
 # ========== PROFILE VIEW - BEGIN ==========
 @login_required
@@ -76,7 +77,7 @@ def profile(request):
     })
 # ========== PROFILE VIEW - END ==========
 
-# Blog Post CRUD Views
+# ========== BLOG POST CRUD VIEWS - BEGIN ==========
 class PostListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'
@@ -84,7 +85,6 @@ class PostListView(ListView):
     ordering = ['-published_date']
     paginate_by = 5
 
-# ========== POST DETAIL VIEW WITH COMMENTS - BEGIN ==========
 class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
@@ -96,7 +96,6 @@ class PostDetailView(DetailView):
         context['comment_form'] = CommentForm()
         context['comments'] = self.object.comments.all()
         return context
-# ========== POST DETAIL VIEW WITH COMMENTS - END ==========
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -135,6 +134,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'Your post has been deleted successfully!')
         return super().delete(request, *args, **kwargs)
+# ========== BLOG POST CRUD VIEWS - END ==========
 
 # ========== COMMENT CRUD OPERATIONS - BEGIN ==========
 class CommentCreateView(LoginRequiredMixin, CreateView):
@@ -144,6 +144,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        # Using 'pk' -required URL pattern: /post/<int:pk>/comments/new/
         form.instance.post_id = self.kwargs['pk']  
         messages.success(self.request, 'Your comment has been added successfully!')
         return super().form_valid(form)
@@ -201,7 +202,7 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return context
 # ========== COMMENT CRUD OPERATIONS - END ==========
 
-# ========== FUNCTION-BASED COMMENT VIEWS (RETAINED FOR COMPATIBILITY) - BEGIN ==========
+# ========== FUNCTION-BASED COMMENT VIEWS - BEGIN ==========
 @login_required
 @require_POST
 def add_comment(request, post_id):
