@@ -1,13 +1,7 @@
 from django.contrib import admin
-from django.urls import include, path
-from blog import views
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
-    path('posts/', views.posts, name='posts'),
-    path('login/', views.login_view, name='login'),
-    path('register/', views.register, name='register'),
-    path('', include('blog.urls')),
-    
+    path('', include('blog.urls')),  # This includes ALL blog URLs (home, auth, posts, comments)
 ]
