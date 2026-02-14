@@ -1,0 +1,125 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block title %}Home - Django Blog{% endblock %}
+
+{% block content %}
+<!-- ========== HOME PAGE CONTENT - BEGIN ========== -->
+<div class="home-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Welcome to Django Blog</h1>
+            <p class="hero-subtitle">Share your thoughts, ideas, and stories with the world</p>
+            {% if not user.is_authenticated %}
+                <div class="hero-cta">
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-large">Get Started</a>
+                    <a href="{% url 'login' %}" class="btn btn-secondary btn-large">Login</a>
+                </div>
+            {% else %}
+                <div class="hero-cta">
+                    <a href="{% url 'post-create' %}" class="btn btn-primary btn-large">Create New Post</a>
+                    <a href="{% url 'post-list' %}" class="btn btn-secondary btn-large">Browse Posts</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Featured Posts Section -->
+    <section class="featured-posts">
+        <h2>Recent Posts</h2>
+        <div class="posts-grid">
+            {% for post in recent_posts %}
+                <article class="post-card">
+                    <h3 class="post-title">
+                        <a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a>
+                    </h3>
+                    <div class="post-meta">
+                        <span class="post-author">By {{ post.author.username }}</span>
+                        <span class="post-date">{{ post.published_date|date:"F j, Y" }}</span>
+                    </div>
+                    <div class="post-excerpt">
+                        {{ post.content|truncatewords:30 }}
+                    </div>
+                    {% if post.tags.all %}
+                        <div class="post-tags">
+                            {% for tag in post.tags.all|slice:":3" %}
+                                <a href="{% url 'tagged-posts' tag.name %}" class="tag-link">#{{ tag.name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'post-detail' post.pk %}" class="btn btn-secondary">Read More</a>
+                </article>
+            {% empty %}
+                <div class="no-posts">
+                    <p>No posts yet. {% if user.is_authenticated %}<a href="{% url 'post-create' %}">Be the first to create one!</a>{% endif %}</p>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="view-all-link">
+            <a href="{% url 'post-list' %}" class="btn btn-primary">View All Posts</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <h2>Why Choose Django Blog?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>Easy to Use</h3>
+                <p>Create and manage your blog posts with our intuitive interface</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏷️</div>
+                <h3>Tagging System</h3>
+                <p>Organize your posts with tags for better discoverability</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Community Engagement</h3>
+                <p>Interact with readers through comments on your posts</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Powerful Search</h3>
+                <p>Find content easily with our advanced search feature</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_posts }}</div>
+                <div class-stat-label>Blog Posts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_users }}</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_comments }}</div>
+                <div class="stat-label">Comments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_tags }}</div>
+                <div class="stat-label">Tags</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    {% if not user.is_authenticated %}
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2>Ready to start blogging?</h2>
+                <p>Join our community today and share your stories with the world</p>
+                <a href="{% url 'register' %}" class="btn btn-primary btn-large">Sign Up Now</a>
+            </div>
+        </section>
+    {% endif %}
+</div>
+<!-- ========== HOME PAGE CONTENT - END ========== -->
+{% endblock %}

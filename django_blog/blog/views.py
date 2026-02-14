@@ -9,12 +9,38 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import require_POST
 from django.db.models import Q
+from django.contrib.auth.models import User
+# ========== TAGGING IMPORTS - BEGIN ==========
+from taggit.models import Tag
+# ========== TAGGING IMPORTS - END ==========
 from .models import Post, Comment
 from .forms import UserRegisterForm, UserUpdateForm, PostForm, CommentForm
 
 # ========== AUTHENTICATION VIEWS - BEGIN ==========
 def home(request):
-    return render(request, 'blog/base.html', {'title': 'Home'})
+    """
+    Home page view with recent posts and site statistics
+    """
+    # Get recent posts
+    recent_posts = Post.objects.all().order_by('-published_date')[:6]
+    
+    # Get statistics
+    total_posts = Post.objects.count()
+    total_users = User.objects.count()
+    total_comments = Comment.objects.count()
+    # ========== FIXED TAG COUNT - BEGIN ==========
+    total_tags = Tag.objects.count()
+    # ========== FIXED TAG COUNT - END ==========
+    
+    context = {
+        'title': 'Home',
+        'recent_posts': recent_posts,
+        'total_posts': total_posts,
+        'total_users': total_users,
+        'total_comments': total_comments,
+        'total_tags': total_tags,
+    }
+    return render(request, 'blog/home.html', context)
 
 def register(request):
     if request.method == 'POST':
