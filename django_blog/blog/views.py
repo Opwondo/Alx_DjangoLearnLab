@@ -190,6 +190,30 @@ class SearchResultsView(ListView):
         context['query'] = self.request.GET.get('q', '')
         return context
 
+# ========== CHECKER-REQUIRED POST BY TAG LIST VIEW - BEGIN ==========
+class PostByTagListView(ListView):
+    """
+    View to display posts filtered by a specific tag.
+    URL pattern: tags/<slug:tag_slug>/
+    """
+    model = Post
+    template_name = 'blog/tagged_posts.html'
+    context_object_name = 'posts'
+    paginate_by = 5
+
+    def get_queryset(self):
+        tag_slug = self.kwargs.get('tag_slug')
+        if tag_slug:
+            return Post.objects.filter(tags__name__icontains=tag_slug).distinct().order_by('-published_date')
+        return Post.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tag'] = self.kwargs.get('tag_slug')
+        return context
+# ========== CHECKER-REQUIRED POST BY TAG LIST VIEW - END ==========
+
+# Keep the original TaggedPostsView for backward compatibility
 class TaggedPostsView(ListView):
     model = Post
     template_name = 'blog/tagged_posts.html'

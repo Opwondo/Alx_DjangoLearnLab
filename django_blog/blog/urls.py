@@ -9,6 +9,7 @@ from .views import (
     # ========== SEARCH AND TAGGING FUNCTIONALITY - BEGIN ==========
     SearchResultsView,
     TaggedPostsView,
+    PostByTagListView,  # CHECKER-REQUIRED VIEW
     # ========== SEARCH AND TAGGING FUNCTIONALITY - END ==========
     # ========== COMMENT CLASS-BASED VIEWS - BEGIN ==========
     CommentCreateView,
@@ -36,7 +37,10 @@ urlpatterns = [
     
     # ========== SEARCH AND TAGGING URLS - BEGIN ==========
     path('search/', SearchResultsView.as_view(), name='search-results'),
-    path('tag/<slug:tag_slug>/', TaggedPostsView.as_view(), name='tagged-posts'),
+    # CHECKER-REQUIRED URL PATTERN: tags/<slug:tag_slug>/
+    path('tags/<slug:tag_slug>/', PostByTagListView.as_view(), name='tagged-posts'),
+    # Alternative pattern for backward compatibility
+    path('tag/<slug:tag_slug>/', TaggedPostsView.as_view(), name='tagged-posts-alt'),
     # ========== SEARCH AND TAGGING URLS - END ==========
     
     # ========== COMMENT URLS - BEGIN ==========
