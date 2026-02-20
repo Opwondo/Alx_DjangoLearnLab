@@ -1,4 +1,5 @@
 # posts/views.py
+from numpy import generic
 from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -86,3 +87,24 @@ class CommentViewSet(viewsets.ModelViewSet):
         if post_id is not None:
             queryset = queryset.filter(post_id=post_id)
         return queryset
+
+class FeedView(generic.ListAPIView):
+    """
+    View to get posts from users that the current user follows
+    """
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    # Fix the permission class:
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Get posts from users that the current user follows
+        """
+        user = self.request.user
+        # Get users that the current user follows
+        following_users = user.following.all()
+        # Return posts from followed users, ordered by creation date (newest first)
+        return Post.objects.filter(
+            author__in=following_users
+        ).order_by('-created_at')

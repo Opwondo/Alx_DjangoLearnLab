@@ -315,3 +315,159 @@ Only authors can update or delete their own posts and comments
 
 Authentication required for all write operations
 
+
+## User Follows and Feed Functionality
+
+### User Management Endpoints
+
+#### Get User Details
+- **URL:** `/api/users/{id}/`
+- **Method:** GET
+- **Headers:** `Authorization: Token your_token_here`
+- **Response:** Detailed user information including follower/following counts
+- **Example:**
+  ```bash
+  curl -H "Authorization: Token YOUR_TOKEN" http://127.0.0.1:8000/api/users/1/
+Follow a User
+URL: /api/follow/{user_id}/
+
+Method: POST
+
+Headers: Authorization: Token your_token_here
+
+Response: Success message with updated counts
+
+Example:
+
+bash
+curl -X POST http://127.0.0.1:8000/api/follow/2/ \
+  -H "Authorization: Token YOUR_TOKEN"
+Unfollow a User
+URL: /api/unfollow/{user_id}/
+
+Method: POST
+
+Headers: Authorization: Token your_token_here
+
+Response: Success message with updated counts
+
+Example:
+
+bash
+curl -X POST http://127.0.0.1:8000/api/unfollow/2/ \
+  -H "Authorization: Token YOUR_TOKEN"
+List Followers
+URL: /api/followers/
+
+Method: GET
+
+Headers: Authorization: Token your_token_here
+
+Response: List of users following you
+
+Example:
+
+bash
+curl -H "Authorization: Token YOUR_TOKEN" http://127.0.0.1:8000/api/followers/
+List Following
+URL: /api/following/
+
+Method: GET
+
+Headers: Authorization: Token your_token_here
+
+Response: List of users you follow
+
+Example:
+
+bash
+curl -H "Authorization: Token YOUR_TOKEN" http://127.0.0.1:8000/api/following/
+Feed Functionality
+Get Your Feed
+URL: /api/feed/
+
+Method: GET
+
+Headers: Authorization: Token your_token_here
+
+Query Parameters:
+
+page: Page number for pagination (10 items per page)
+
+Response: Paginated list of posts from users you follow, ordered by most recent first
+
+Example:
+
+bash
+curl -H "Authorization: Token YOUR_TOKEN" "http://127.0.0.1:8000/api/feed/?page=1"
+Complete Workflow Example
+bash
+# 1. Login as user1
+curl -X POST http://127.0.0.1:8000/api/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "user1", "password": "password123"}'
+
+# Save the token from response: TOKEN1
+
+# 2. Login as user2
+curl -X POST http://127.0.0.1:8000/api/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "user2", "password": "password123"}'
+
+# Save the token from response: TOKEN2
+
+# 3. User1 follows user2
+curl -X POST http://127.0.0.1:8000/api/follow/2/ \
+  -H "Authorization: Token TOKEN1"
+
+# 4. User2 creates a post
+curl -X POST http://127.0.0.1:8000/api/posts/ \
+  -H "Authorization: Token TOKEN2" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "My Post", "content": "This will appear in feeds"}'
+
+# 5. User1 views their feed (should see user2's post)
+curl -H "Authorization: Token TOKEN1" http://127.0.0.1:8000/api/feed/
+Model Updates
+CustomUser Model Additions
+Added following field: Many-to-Many relationship to self
+
+symmetrical=False: Following is one-way relationship
+
+related_name='followers': Access followers through this relation
+
+New Properties
+followers_count: Number of users following this user
+
+following_count: Number of users this user follows
+
+posts_count: Number of posts by this user
+
+Permission Rules for Follow System
+Users must be authenticated to:
+
+View other users' details
+
+Follow/unfollow users
+
+View their followers/following lists
+
+Access their feed
+
+Users cannot follow/unfollow themselves
+
+Users can only modify their own following list
+
+Error Responses for Follow System
+400 Bad Request:
+
+Trying to follow/unfollow yourself
+
+Trying to follow someone you already follow
+
+Trying to unfollow someone you don't follow
+
+401 Unauthorized: Missing or invalid token
+
+404 Not Found: User doesn't exist
+

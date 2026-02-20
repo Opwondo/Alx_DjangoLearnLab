@@ -1,15 +1,11 @@
-# accounts/serializers.py
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token  # Required import
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model  # Add this import
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user registration
-    """
     password = serializers.CharField(
         write_only=True,
         required=True,
@@ -34,10 +30,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        # Remove password2 from the data
         validated_data.pop('password2')
-        
-        # Use get_user_model().objects.create_user as required by checker
         user = get_user_model().objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -45,16 +38,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             bio=validated_data.get('bio', ''),
             profile_picture=validated_data.get('profile_picture', None)
         )
-        
-        # Create token for the new user - exactly what checker wants
         Token.objects.create(user=user)
-        
         return user
 
 class UserLoginSerializer(serializers.Serializer):
-    """
-    Serializer for user login
-    """
     username = serializers.CharField()
     password = serializers.CharField(
         write_only=True,
@@ -79,15 +66,46 @@ class UserLoginSerializer(serializers.Serializer):
         
         return data
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     """
-    Serializer for viewing/updating user profiles
+    Serializer for user details including follow information
     """
     followers_count = serializers.IntegerField(read_only=True)
     following_count = serializers.IntegerField(read_only=True)
+    posts_count = serializers.IntegerField(read_only=True)
+    is_following = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'bio', 'profile_picture',
+            'followers_count', 'following_count', 'posts_count',
+            'date_joined', 'is_following'
+        ]
+        read_only_fields = ['id', 'date_joined']
+
+    def get_is_following(self, obj):
+        """
+        Check if the current user is following this user
+        """
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return request.user.following.filter(id=obj.id).exists()
+        return False
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user profile (for the current user)
+    """
+    followers_count = serializers.IntegerField(read_only=True)
+    following_count = serializers.IntegerField(read_only=True)
+    posts_count = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'bio', 'profile_picture', 
-                 'followers_count', 'following_count', 'date_joined']
+        fields = [
+            'id', 'username', 'email', 'bio', 'profile_picture',
+            'followers_count', 'following_count', 'posts_count',
+            'date_joined'
+        ]
         read_only_fields = ['id', 'date_joined']

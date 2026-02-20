@@ -42,3 +42,8 @@ class CustomUser(AbstractUser):
     def following_count(self):
         """Helper property to get number of users this user follows"""
         return self.following.count()
+    
+    @property
+    def posts_count(self):
+        """Get number of posts by this user"""
+        return self.posts.count()
