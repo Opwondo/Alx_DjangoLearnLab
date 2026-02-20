@@ -471,3 +471,197 @@ Trying to unfollow someone you don't follow
 
 404 Not Found: User doesn't exist
 
+
+## Likes and Notifications Functionality
+
+### Like System Endpoints
+
+#### Like a Post
+- **URL:** `/api/posts/{post_id}/like/`
+- **Method:** POST
+- **Headers:** `Authorization: Token your_token_here`
+- **Response:**
+  ```json
+  {
+    "message": "You liked post \"Post Title\"",
+    "likes_count": 5
+  }
+Example:
+
+bash
+curl -X POST http://127.0.0.1:8000/api/posts/1/like/ \
+  -H "Authorization: Token YOUR_TOKEN"
+Unlike a Post
+URL: /api/posts/{post_id}/unlike/
+
+Method: POST
+
+Headers: Authorization: Token your_token_here
+
+Response:
+
+json
+{
+  "message": "You unliked post \"Post Title\"",
+  "likes_count": 4
+}
+Example:
+
+bash
+curl -X POST http://127.0.0.1:8000/api/posts/1/unlike/ \
+  -H "Authorization: Token YOUR_TOKEN"
+Get Users Who Liked a Post
+URL: /api/posts/{post_id}/likes/
+
+Method: GET
+
+Headers: Authorization: Token your_token_here
+
+Response: List of users who liked the post
+
+Example:
+
+bash
+curl -H "Authorization: Token YOUR_TOKEN" http://127.0.0.1:8000/api/posts/1/likes/
+Notification System Endpoints
+Get Notifications
+URL: /api/notifications/
+
+Method: GET
+
+Headers: Authorization: Token your_token_here
+
+Query Parameters:
+
+show_read=true - Include read notifications (default: false)
+
+type=like - Filter by notification type (like, comment, follow)
+
+Response: Paginated list of notifications
+
+Example:
+
+bash
+curl -H "Authorization: Token YOUR_TOKEN" "http://127.0.0.1:8000/api/notifications/?show_read=false&type=like"
+Get Unread Notification Count
+URL: /api/notifications/unread-count/
+
+Method: GET
+
+Headers: Authorization: Token your_token_here
+
+Response:
+
+json
+{
+  "unread_count": 3
+}
+Example:
+
+bash
+curl -H "Authorization: Token YOUR_TOKEN" http://127.0.0.1:8000/api/notifications/unread-count/
+Mark Notifications as Read
+URL: /api/notifications/mark-read/
+
+Method: POST
+
+Headers: Authorization: Token your_token_here
+
+Body Options:
+
+json
+// Mark specific notifications
+{
+  "notification_ids": [1, 2, 3]
+}
+
+// Mark all notifications as read
+{
+  "mark_all": true
+}
+Example:
+
+bash
+curl -X POST http://127.0.0.1:8000/api/notifications/mark-read/ \
+  -H "Authorization: Token YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"mark_all": true}'
+Post Serializer Updates
+The Post serializer now includes:
+
+likes_count: Total number of likes
+
+is_liked_by_user: Boolean indicating if current user liked the post
+
+likes: Detailed list of likes (included in response)
+
+Complete Workflow Examples
+Workflow 1: Like and Notification Flow
+bash
+# 1. User1 creates a post
+curl -X POST http://127.0.0.1:8000/api/posts/ \
+  -H "Authorization: Token USER1_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "My Awesome Post", "content": "This is content"}'
+
+# 2. User2 likes the post
+curl -X POST http://127.0.0.1:8000/api/posts/1/like/ \
+  -H "Authorization: Token USER2_TOKEN"
+
+# 3. User1 checks notifications (should see a like notification)
+curl -H "Authorization: Token USER1_TOKEN" http://127.0.0.1:8000/api/notifications/
+
+# 4. User1 marks notifications as read
+curl -X POST http://127.0.0.1:8000/api/notifications/mark-read/ \
+  -H "Authorization: Token USER1_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"mark_all": true}'
+Workflow 2: Comment and Notification Flow
+bash
+# 1. User2 comments on User1's post
+curl -X POST http://127.0.0.1:8000/api/posts/1/comments/ \
+  -H "Authorization: Token USER2_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "Great post!"}'
+
+# 2. User1 gets notification
+curl -H "Authorization: Token USER1_TOKEN" http://127.0.0.1:8000/api/notifications/
+
+# 3. User1 checks unread count
+curl -H "Authorization: Token USER1_TOKEN" http://127.0.0.1:8000/api/notifications/unread-count/
+Notification Types
+follow: When someone follows you
+
+like: When someone likes your post
+
+comment: When someone comments on your post
+
+Error Responses
+400 Bad Request:
+
+Liking a post twice
+
+Unliking a post you haven't liked
+
+Invalid notification IDs
+
+401 Unauthorized: Missing or invalid token
+
+404 Not Found: Post or notification doesn't exist
+
+Database Schema Updates
+New Models
+Like Model
+python
+- user (ForeignKey to User)
+- post (ForeignKey to Post)
+- created_at (DateTime)
+- unique_together: ['user', 'post']
+Notification Model
+python
+- recipient (ForeignKey to User)
+- actor (ForeignKey to User)
+- verb (CharField: follow/like/comment)
+- target (GenericForeignKey to any object)
+- created_at (DateTime)
+- is_read (Boolean)

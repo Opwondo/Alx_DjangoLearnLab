@@ -4,8 +4,13 @@ from rest_framework import viewsets, permissions, filters, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from django.contrib.contenttypes.models import ContentType
+
+from notifications.models import Notification
+
+from notifications.models import Notification
+from .models import Like, Like, Post, Comment
+from .serializers import LikeSerializer, PostSerializer, CommentSerializer
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
@@ -72,3 +77,74 @@ class FeedView(generics.ListAPIView):
     def get_queryset(self):
         following_users = self.request.user.following.all()
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
+
+@action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+def like(self, request, pk=None):
+        """
+        Like a post
+        """
+        post = self.get_object()
+        user = request.user
+
+        # Check if already liked
+        like, created = Like.objects.get_or_create(user=user, post=post)
+        
+        if created:
+            # Create notification for post author (if not liking own post)
+            if post.author != user:
+                Notification.objects.create(
+                    recipient=post.author,
+                    actor=user,
+                    verb=Notification.LIKE,
+                    target=post
+                )
+            
+            return Response({
+                'message': f'You liked post "{post.title}"',
+                'likes_count': post.likes.count()
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response({
+                'message': 'You already liked this post'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+@action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+def unlike(self, request, pk=None):
+        """
+        Unlike a post
+        """
+        post = self.get_object()
+        user = request.user
+
+        # Check if like exists
+        try:
+            like = Like.objects.get(user=user, post=post)
+            like.delete()
+            
+            # Delete the notification (optional)
+            Notification.objects.filter(
+                recipient=post.author,
+                actor=user,
+                verb=Notification.LIKE,
+                object_id=post.id,
+                content_type=ContentType.objects.get_for_model(post)
+            ).delete()
+            
+            return Response({
+                'message': f'You unliked post "{post.title}"',
+                'likes_count': post.likes.count()
+            }, status=status.HTTP_200_OK)
+        except Like.DoesNotExist:
+            return Response({
+                'message': 'You have not liked this post'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+@action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+def likes(self, request, pk=None):
+        """
+        Get all users who liked this post
+        """
+        post = self.get_object()
+        likes = post.likes.all()
+        serializer = LikeSerializer(likes, many=True)
+        return Response(serializer.data)

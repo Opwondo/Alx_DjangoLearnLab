@@ -1,6 +1,6 @@
 # posts/serializers.py
 from rest_framework import serializers
-from .models import Post, Comment
+from .models import Like, Post, Comment
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -64,3 +64,26 @@ class PostSerializer(serializers.ModelSerializer):
         if not value.strip():
             raise serializers.ValidationError("Content cannot be empty")
         return value
+
+class LikeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Like model
+    """
+    username = serializers.ReadOnlyField(source='user.username')
+    post_title = serializers.ReadOnlyField(source='post.title')
+
+    class Meta:
+        model = Like
+        fields = ['id', 'user', 'username', 'post', 'post_title', 'created_at']
+        read_only_fields = ['id', 'user', 'created_at']
+    
+    def validate(self, data):
+        """
+        Ensure that a user cannot like the same post multiple times
+        """
+        user = self.context['request'].user
+        post = data.get('post')
+        if Like.objects.filter(user=user, post=post).exists():
+            raise serializers.ValidationError("You have already liked this post")
+        return data
+    
