@@ -13,5 +13,8 @@ urlpatterns = [
     path('', include(router.urls)),
     path('feed/', FeedView.as_view(), name='feed'),  # Add feed endpoint
 
+    path('<int:pk>/like/', PostViewSet.as_view({'post': 'like'}), name='post-like'),
+    path('<int:pk>/unlike/', PostViewSet.as_view({'post': 'unlike'}), name='post-unlike'),
+    path('<int:pk>/likes/', PostViewSet.as_view({'get': 'likes_list'}), name='post-likes'),
     path('feed/', FeedView.as_view(), name='feed'),
 ]
