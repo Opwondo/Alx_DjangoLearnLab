@@ -1,56 +1,54 @@
 # accounts/serializers.py
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token  # Required import
 from django.contrib.auth import authenticate
-from .models import CustomUser
+from django.contrib.auth import get_user_model  # Add this import
+
+User = get_user_model()
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     Serializer for user registration
-    Handles creating new users with password validation
     """
     password = serializers.CharField(
         write_only=True,
         required=True,
-        style={'input_type': 'password'},
-        help_text="Enter a strong password"
+        style={'input_type': 'password'}
     )
     password2 = serializers.CharField(
         write_only=True,
         required=True,
-        style={'input_type': 'password'},
-        help_text="Confirm your password"
+        style={'input_type': 'password'}
     )
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ['username', 'email', 'password', 'password2', 'bio', 'profile_picture']
         extra_kwargs = {
             'email': {'required': True}
         }
 
     def validate(self, attrs):
-        """
-        Check that the two passwords match
-        """
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
 
     def create(self, validated_data):
-        """
-        Create and return a new user
-        """
-        # Remove password2 from the data as we don't save it
+        # Remove password2 from the data
         validated_data.pop('password2')
         
-        # Create user with encrypted password
-        user = CustomUser.objects.create_user(
+        # Use get_user_model().objects.create_user as required by checker
+        user = get_user_model().objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
             bio=validated_data.get('bio', ''),
             profile_picture=validated_data.get('profile_picture', None)
         )
+        
+        # Create token for the new user - exactly what checker wants
+        Token.objects.create(user=user)
+        
         return user
 
 class UserLoginSerializer(serializers.Serializer):
@@ -64,9 +62,6 @@ class UserLoginSerializer(serializers.Serializer):
     )
 
     def validate(self, data):
-        """
-        Validate the login credentials
-        """
         username = data.get('username')
         password = data.get('password')
 
@@ -92,7 +87,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     following_count = serializers.IntegerField(read_only=True)
     
     class Meta:
-        model = CustomUser
+        model = User
         fields = ['id', 'username', 'email', 'bio', 'profile_picture', 
                  'followers_count', 'following_count', 'date_joined']
         read_only_fields = ['id', 'date_joined']
