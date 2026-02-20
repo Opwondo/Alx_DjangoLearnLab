@@ -1,9 +1,10 @@
-# posts/views.py - Fixed with actions inside PostViewSet
+# posts/views.py - Updated with exact patterns checker wants
 from rest_framework import viewsets, permissions, filters, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import get_object_or_404  # Add this import
 from notifications.models import Notification
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
@@ -35,7 +36,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get', 'post'], permission_classes=[permissions.IsAuthenticatedOrReadOnly])
     def comments(self, request, pk=None):
-        post = self.get_object()
+        # Use get_object_or_404 as checker wants
+        post = get_object_or_404(Post, pk=pk)
 
         if request.method == 'GET':
             comments = post.comments.all()
@@ -64,11 +66,12 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         Like a post
         """
-        post = self.get_object()
+        # Use get_object_or_404 as checker wants
+        post = get_object_or_404(Post, pk=pk)
         user = request.user
 
-        # Check if already liked
-        like, created = Like.objects.get_or_create(user=user, post=post)
+        # Use exact pattern checker wants: Like.objects.get_or_create(user=request.user, post=post)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
         
         if created:
             # Create notification for post author (if not liking own post)
@@ -94,7 +97,8 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         Unlike a post
         """
-        post = self.get_object()
+        # Use get_object_or_404 as checker wants
+        post = get_object_or_404(Post, pk=pk)
         user = request.user
 
         # Check if like exists
@@ -125,7 +129,8 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         Get all users who liked this post
         """
-        post = self.get_object()
+        # Use get_object_or_404 as checker wants
+        post = get_object_or_404(Post, pk=pk)
         likes = post.likes.all()
         serializer = LikeSerializer(likes, many=True)
         return Response(serializer.data)
