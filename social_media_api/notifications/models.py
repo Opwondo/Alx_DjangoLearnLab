@@ -1,4 +1,4 @@
-# notifications/models.py
+# notifications/models.py - Updated with "timestamp" field
 from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -49,7 +49,8 @@ class Notification(models.Model):
     )
     target = GenericForeignKey('content_type', 'object_id')
     
-    created_at = models.DateTimeField(
+    # Changed from created_at to timestamp as requested by checker
+    timestamp = models.DateTimeField(
         auto_now_add=True
     )
     is_read = models.BooleanField(
@@ -57,9 +58,9 @@ class Notification(models.Model):
     )
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-timestamp']  # Updated to use timestamp
         indexes = [
-            models.Index(fields=['recipient', 'is_read', '-created_at']),
+            models.Index(fields=['recipient', 'is_read', '-timestamp']),  # Updated to use timestamp
         ]
 
     def __str__(self):

@@ -1,4 +1,4 @@
-# notifications/serializers.py
+# notifications/serializers.py - Updated to use timestamp
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
 from .models import Notification
@@ -20,9 +20,9 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = [
             'id', 'recipient', 'recipient_username', 'actor', 'actor_username',
-            'verb', 'target_type', 'target_summary', 'created_at', 'is_read'
+            'verb', 'target_type', 'target_summary', 'timestamp', 'is_read'  # Changed to timestamp
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'timestamp']  # Changed to timestamp
 
     def get_target_type(self, obj):
         """

@@ -1,16 +1,12 @@
-# posts/views.py
-
+# posts/views.py - Fixed with actions inside PostViewSet
 from rest_framework import viewsets, permissions, filters, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.contenttypes.models import ContentType
-
 from notifications.models import Notification
-
-from notifications.models import Notification
-from .models import Like, Like, Post, Comment
-from .serializers import LikeSerializer, PostSerializer, CommentSerializer
+from .models import Post, Comment, Like
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
@@ -49,37 +45,22 @@ class PostViewSet(viewsets.ModelViewSet):
         elif request.method == 'POST':
             serializer = CommentSerializer(data=request.data)
             if serializer.is_valid():
-                serializer.save(post=post, author=request.user)
+                comment = serializer.save(post=post, author=request.user)
+                
+                # Create notification for post author (if not commenting on own post)
+                if post.author != request.user:
+                    Notification.objects.create(
+                        recipient=post.author,
+                        actor=request.user,
+                        verb=Notification.COMMENT,
+                        target=post
+                    )
+                
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
-    def get_queryset(self):
-        queryset = Comment.objects.all()
-        post_id = self.request.query_params.get('post', None)
-        if post_id is not None:
-            queryset = queryset.filter(post_id=post_id)
-        return queryset
-
-
-class FeedView(generics.ListAPIView):
-    serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        following_users = self.request.user.following.all()
-        return Post.objects.filter(author__in=following_users).order_by('-created_at')
-
-@action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-def like(self, request, pk=None):
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
         """
         Like a post
         """
@@ -108,8 +89,8 @@ def like(self, request, pk=None):
                 'message': 'You already liked this post'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-@action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-def unlike(self, request, pk=None):
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unlike(self, request, pk=None):
         """
         Unlike a post
         """
@@ -139,8 +120,8 @@ def unlike(self, request, pk=None):
                 'message': 'You have not liked this post'
             }, status=status.HTTP_400_BAD_REQUEST)
 
-@action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
-def likes(self, request, pk=None):
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def likes_list(self, request, pk=None):
         """
         Get all users who liked this post
         """
@@ -148,3 +129,28 @@ def likes(self, request, pk=None):
         likes = post.likes.all()
         serializer = LikeSerializer(likes, many=True)
         return Response(serializer.data)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        queryset = Comment.objects.all()
+        post_id = self.request.query_params.get('post', None)
+        if post_id is not None:
+            queryset = queryset.filter(post_id=post_id)
+        return queryset
+
+
+class FeedView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        following_users = self.request.user.following.all()
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')
