@@ -129,8 +129,7 @@ class PostViewSet(viewsets.ModelViewSet):
         """
         Get all users who liked this post
         """
-        # Use get_object_or_404 as checker wants
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         likes = post.likes.all()
         serializer = LikeSerializer(likes, many=True)
         return Response(serializer.data)
