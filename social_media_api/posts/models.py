@@ -11,23 +11,17 @@ class Post(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='posts',
-        help_text="The user who created this post"
+        related_name='posts'
     )
     title = models.CharField(
-        max_length=255,
-        help_text="Title of the post"
+        max_length=255
     )
-    content = models.TextField(
-        help_text="Main content of the post"
-    )
+    content = models.TextField()  # Explicit TextField()
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        help_text="Timestamp when post was created"
+        auto_now_add=True
     )
     updated_at = models.DateTimeField(
-        auto_now=True,
-        help_text="Timestamp when post was last updated"
+        auto_now=True
     )
 
     class Meta:
@@ -44,25 +38,19 @@ class Comment(models.Model):
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name='comments',
-        help_text="The post this comment belongs to"
+        related_name='comments'
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='comments',
-        help_text="The user who created this comment"
+        related_name='comments'
     )
-    content = models.TextField(
-        help_text="The comment text"
-    )
+    content = models.TextField()  # Explicit TextField() 
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        help_text="Timestamp when comment was created"
+        auto_now_add=True
     )
     updated_at = models.DateTimeField(
-        auto_now=True,
-        help_text="Timestamp when comment was last updated"
+        auto_now=True
     )
 
     class Meta:
