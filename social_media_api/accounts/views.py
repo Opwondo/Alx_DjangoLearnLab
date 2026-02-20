@@ -1,18 +1,17 @@
 # accounts/views.py
 
-from rest_framework import generics, status, views, permissions
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from .models import CustomUser
 
 
-class FollowUserView(views.APIView):
+class FollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):
-        user_to_follow = get_object_or_404(User, id=user_id)
+        user_to_follow = get_object_or_404(CustomUser.objects.all(), id=user_id)
 
         if request.user == user_to_follow:
             return Response(
@@ -28,11 +27,18 @@ class FollowUserView(views.APIView):
         )
 
 
-class UnfollowUserView(views.APIView):
+class UnfollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):
-        user_to_unfollow = get_object_or_404(User, id=user_id)
+        user_to_unfollow = get_object_or_404(CustomUser.objects.all(), id=user_id)
+
+        if request.user == user_to_unfollow:
+            return Response(
+                {"error": "You cannot unfollow yourself"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         request.user.following.remove(user_to_unfollow)
 
