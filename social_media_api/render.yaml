@@ -1,0 +1,34 @@
+# render.yaml
+services:
+  - type: web
+    name: social-media-api
+    runtime: python
+    region: ohio  # Choose nearest region: oregon, ohio, frankfurt, singapore
+    plan: free
+    branch: main
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: gunicorn social_media_api.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: .onrender.com,localhost,127.0.0.1
+      - key: DJANGO_SETTINGS_MODULE
+        value: social_media_api.settings_render
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: PYTHON_VERSION
+        value: 3.12.3
+    healthCheckPath: /health/
+
+databases:
+  - name: social-media-db
+    plan: free
+    databaseName: social_media
+    user: social_media_user
+    region: ohio
