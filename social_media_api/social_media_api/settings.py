@@ -15,6 +15,8 @@ from pathlib import Path
 import os
 from pathlib import Path
 
+from social_media_api.settings_render import SECURE_BROWSER_XSS_FILTER, SECURE_SSL_REDIRECT, X_FRAME_OPTIONS
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -161,3 +163,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Add this line
 # For media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_SSL_REDIRECT = True
