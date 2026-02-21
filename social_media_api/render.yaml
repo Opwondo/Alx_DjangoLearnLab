@@ -3,7 +3,7 @@ services:
   - type: web
     name: social-media-api
     runtime: python
-    region: ohio  # Choose nearest region: oregon, ohio, frankfurt, singapore
+    region: ohio
     plan: free
     branch: main
     buildCommand: |
@@ -24,6 +24,41 @@ services:
         value: 2
       - key: PYTHON_VERSION
         value: 3.12.3
+      # Database credentials from Render's managed database
+      - key: DB_NAME
+        fromDatabase:
+          name: social-media-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: social-media-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: social-media-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: social-media-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: social-media-db
+          property: port
+      # Keep DATABASE_URL for compatibility
+      - key: DATABASE_URL
+        fromDatabase:
+          name: social-media-db
+          property: connectionString
+      # AWS S3 credentials 
+      # - key: AWS_ACCESS_KEY_ID
+      #   sync: false
+      # - key: AWS_SECRET_ACCESS_KEY
+      #   sync: false
+      # - key: AWS_STORAGE_BUCKET_NAME
+      #   sync: false
+      # - key: AWS_S3_REGION_NAME
+      #   value: us-east-1
     healthCheckPath: /health/
 
 databases:
